@@ -965,6 +965,14 @@ export const zProviderCatalogTemplateResponse_unstable = z.object({
     template: zProviderTemplateDto
 });
 
+export const zCustomProviderModelDto = z.object({
+    name: z.string(),
+    contextLimit: z.union([
+        z.number().int().gte(0),
+        z.null()
+    ]).optional()
+});
+
 /**
  * Create a custom provider backed by Goose's declarative provider store.
  */
@@ -976,7 +984,7 @@ export const zCustomProviderCreateRequest_unstable = z.object({
         z.string(),
         z.null()
     ]).optional(),
-    models: z.array(z.string()).optional().default([]),
+    models: z.array(zCustomProviderModelDto).optional().default([]),
     supportsStreaming: z.union([
         z.boolean(),
         z.null()
@@ -1040,7 +1048,7 @@ export const zCustomProviderConfigDto = z.object({
     engine: z.string(),
     displayName: z.string(),
     apiUrl: z.string(),
-    models: z.array(z.string()).optional().default([]),
+    models: z.array(zCustomProviderModelDto).optional().default([]),
     supportsStreaming: z.union([
         z.boolean(),
         z.null()
@@ -1081,7 +1089,7 @@ export const zCustomProviderUpdateRequest_unstable = z.object({
         z.string(),
         z.null()
     ]).optional(),
-    models: z.array(z.string()).optional().default([]),
+    models: z.array(zCustomProviderModelDto).optional().default([]),
     supportsStreaming: z.union([
         z.boolean(),
         z.null()
