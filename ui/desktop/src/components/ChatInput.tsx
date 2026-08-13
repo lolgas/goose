@@ -80,7 +80,7 @@ const removeQueuedMessage = (messages: QueuedMessage[], messageId: string): Queu
 
 const MAX_IMAGES_PER_MESSAGE = 10;
 
-const TOKEN_LIMIT_DEFAULT = 128000; // fallback for custom models that the backend doesn't know about
+const TOKEN_LIMIT_DEFAULT = 128000; // used before a session has a backend-resolved limit
 
 const getContextAlertType = (totalTokens: number, tokenLimit: number): AlertType => {
   const percentage = tokenLimit ? (totalTokens / tokenLimit) * 100 : 0;
@@ -170,6 +170,7 @@ interface ChatInputProps {
   onFilesProcessed?: () => void;
   setView: (view: View) => void;
   totalTokens?: number;
+  contextLimit?: number;
   accumulatedInputTokens?: number;
   accumulatedOutputTokens?: number;
   accumulatedCost?: number | null;
@@ -205,6 +206,7 @@ export default function ChatInput({
   onFilesProcessed,
   setView,
   totalTokens,
+  contextLimit,
   accumulatedInputTokens,
   accumulatedOutputTokens,
   accumulatedCost,
@@ -577,7 +579,10 @@ export default function ChatInput({
   // Load providers and get current model's token limit
   const loadProviderDetails = async () => {
     try {
-      // Reset token limit loaded state
+      if (sessionId) {
+        setIsTokenLimitLoaded(false);
+        return;
+      }
       setIsTokenLimitLoaded(false);
 
       // Use effective model/provider (includes overrides from in-session model changes),
@@ -639,7 +644,14 @@ export default function ChatInput({
   useEffect(() => {
     loadProviderDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveModel, effectiveProvider, configModel, configProvider]);
+  }, [effectiveModel, effectiveProvider, configModel, configProvider, sessionId]);
+
+  useEffect(() => {
+    if (contextLimit !== undefined) {
+      setTokenLimit(contextLimit);
+      setIsTokenLimitLoaded(true);
+    }
+  }, [contextLimit]);
 
   // Handle token usage alerts
   useEffect(() => {

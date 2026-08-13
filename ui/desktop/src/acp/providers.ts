@@ -19,7 +19,7 @@ function updateRequestToCreate(
     displayName: request.display_name,
     apiUrl: request.api_url,
     apiKey: request.api_key || null,
-    models: request.models,
+    models: request.models as unknown as string[],
     supportsStreaming: request.supports_streaming ?? null,
     headers: request.headers ?? undefined,
     requiresAuth: request.requires_auth ?? true,
@@ -54,7 +54,7 @@ export async function acpListProviderDetails(): Promise<ProviderDetails[]> {
       })),
       known_models: entry.models.map((model) => ({
         name: model.id,
-        context_limit: model.contextLimit ?? 0,
+        context_limit: model.contextLimit ?? undefined,
         reasoning: model.reasoning ?? undefined,
       })),
       setup_steps: entry.setupSteps,
