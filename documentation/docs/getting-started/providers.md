@@ -491,7 +491,9 @@ Custom providers must use OpenAI, Anthropic, or Ollama compatible API formats. T
       "models": [
         {
           "name": "gpt-4o",
-          "context_limit": 128000
+          "context_limit": 128000,
+          "input_token_cost": 0.0000025,
+          "output_token_cost": 0.00001
         },
         {
           "name": "gpt-3.5-turbo",
@@ -506,6 +508,10 @@ Custom providers must use OpenAI, Anthropic, or Ollama compatible API formats. T
       "requires_auth": true
     }
     ```
+
+    :::note Model cost fields
+    Optional per-model fields `input_token_cost` and `output_token_cost` specify the **USD cost per token** (not per million tokens). goose uses them to estimate session costs for [Cost Tracking](/docs/guides/sessions/smart-context-management#cost-tracking) when the model isn't covered by goose's bundled pricing registry — for example, models on custom or self-hosted endpoints. Both fields must be set for cost estimation to apply; models with partial or missing pricing fall back to the bundled registry as before, so existing configs are unaffected. Declared input/output prices always outrank registry catalog rates (the bundled registry can only guess rates for custom endpoints), including models the registry deliberately prices at \$0 (e.g. local inference). When the config doesn't declare cache pricing, canonical cache rates are used so cached tokens aren't estimated at the full input rate. Cost fields are read once per session/backend start — restart goose after editing them.
+    :::
 
     Then use the `api_key_env` to set the key for your session. For example:
     ```bash
